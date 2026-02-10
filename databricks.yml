@@ -1,0 +1,25 @@
+# Databricks Asset Bundle Configuration
+bundle:
+  name: dab_demo
+
+include:
+  - resources/*.yml
+
+targets:
+  # Development target
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://your-workspace.cloud.databricks.com
+    
+  # Production target
+  prod:
+    mode: production
+    workspace:
+      host: https://your-workspace.cloud.databricks.com
+      root_path: /Shared/.bundle/prod/${bundle.name}
+    run_as:
+      # Service principal for production deployments
+      service_principal_name: "your-service-principal"
+

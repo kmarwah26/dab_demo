@@ -1,0 +1,57 @@
+resources:
+  jobs:
+    demo_workflow:
+      name: demo_workflow_${bundle.target}
+      
+      tasks:
+        - task_key: task_1_data_preparation
+          notebook_task:
+            notebook_path: ../src/task_1_data_preparation.py
+            source: WORKSPACE
+          new_cluster:
+            spark_version: "13.3.x-scala2.12"
+            node_type_id: "i3.xlarge"
+            num_workers: 2
+            spark_conf:
+              "spark.databricks.cluster.profile": "singleNode"
+              "spark.master": "local[*]"
+            custom_tags:
+              ResourceClass: "SingleNode"
+        
+        - task_key: task_2_data_analysis
+          depends_on:
+            - task_key: task_1_data_preparation
+          notebook_task:
+            notebook_path: ../src/task_2_data_analysis.py
+            source: WORKSPACE
+          new_cluster:
+            spark_version: "13.3.x-scala2.12"
+            node_type_id: "i3.xlarge"
+            num_workers: 2
+            spark_conf:
+              "spark.databricks.cluster.profile": "singleNode"
+              "spark.master": "local[*]"
+            custom_tags:
+              ResourceClass: "SingleNode"
+      
+      # Schedule to run daily at 9 AM UTC
+      schedule:
+        quartz_cron_expression: "0 0 9 * * ?"
+        timezone_id: "UTC"
+        pause_status: "PAUSED"
+      
+      # Email notifications
+      email_notifications:
+        on_failure:
+          - your-email@example.com
+      
+      # Maximum concurrent runs
+      max_concurrent_runs: 1
+      
+      # Timeout in seconds (2 hours)
+      timeout_seconds: 7200
+      
+      tags:
+        environment: "${bundle.target}"
+        project: "dab_demo"
+
