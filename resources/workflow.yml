@@ -10,7 +10,7 @@ resources:
             source: WORKSPACE
           new_cluster:
             spark_version: "13.3.x-scala2.12"
-            node_type_id: "i3.xlarge"
+            node_type_id: "Standard_DS3_v2"
             num_workers: 2
             spark_conf:
               "spark.databricks.cluster.profile": "singleNode"
@@ -26,7 +26,7 @@ resources:
             source: WORKSPACE
           new_cluster:
             spark_version: "13.3.x-scala2.12"
-            node_type_id: "i3.xlarge"
+            node_type_id: "Standard_DS3_v2"
             num_workers: 2
             spark_conf:
               "spark.databricks.cluster.profile": "singleNode"
@@ -43,13 +43,13 @@ resources:
       # Email notifications
       email_notifications:
         on_failure:
-          - your-email@example.com
+          - kunal.marwah@databricks.com
       
       # Maximum concurrent runs
       max_concurrent_runs: 1
       
-      # Timeout in seconds (2 hours)
-      timeout_seconds: 7200
+      # Timeout in seconds (4mins)
+      timeout_seconds: 240
       
       tags:
         environment: "${bundle.target}"

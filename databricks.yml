@@ -11,13 +11,14 @@ targets:
     mode: development
     default: true
     workspace:
-      host: https://your-workspace.cloud.databricks.com
+      host: https://adb-984752964297111.11.azuredatabricks.net/
+      profile: azure
     
   # Production target
   prod:
     mode: production
     workspace:
-      host: https://your-workspace.cloud.databricks.com
+      host: https://eastus2.azuredatabricks.net/?o=5206439413157315
       root_path: /Shared/.bundle/prod/${bundle.name}
     run_as:
       # Service principal for production deployments
