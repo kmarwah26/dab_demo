@@ -8,10 +8,14 @@ This project demonstrates a simple Databricks Asset Bundle (DAB) with a workflow
 dab_demo/
 ├── databricks.yml              # Main DAB configuration file
 ├── resources/
-│   └── workflow.yml           # Workflow resource definition
+│   ├── workflow.yml           # Main workflow resource definition
+│   └── test_workflow.yml      # Integration test workflow definition
 ├── src/
 │   ├── task_1_data_preparation.py   # First task notebook
 │   └── task_2_data_analysis.py      # Second task notebook
+├── tests/
+│   └── test_workflow.py       # Integration tests
+├── run_tests.sh               # Test execution script
 └── README.md                  # This file
 ```
 
@@ -81,6 +85,86 @@ Before deploying, update the `databricks.yml` file:
 
 4. **Adjust cluster configuration** if needed (node types, Spark version, etc.)
 
+## Integrated Testing
+
+This bundle includes comprehensive integration testing that validates your workflow end-to-end after deployment.
+
+### Test Coverage
+
+The integration tests verify:
+
+1. **Data Preparation Output** - Validates that Task 1 produces expected data
+2. **Data Quality** - Checks for duplicates, valid values, and schema correctness
+3. **Analysis Results** - Verifies Task 2 analysis outputs exist and are correct
+4. **Data Consistency** - Ensures consistency between preparation and analysis stages
+
+### Running Tests
+
+#### Option 1: Automated Testing with Script (Recommended)
+
+Use the provided test script for end-to-end deployment and testing:
+
+```bash
+# Run tests for dev environment
+./run_tests.sh dev
+
+# Run tests for prod environment
+./run_tests.sh prod
+```
+
+This will:
+1. Deploy the bundle to your workspace
+2. Run the main workflow
+3. Execute integration tests
+4. Report results
+
+#### Option 2: Manual Step-by-Step Testing
+
+Run each component individually:
+
+```bash
+# 1. Deploy the bundle
+databricks bundle deploy --target dev
+
+# 2. Run the main workflow
+databricks bundle run demo_workflow_dev --target dev
+
+# 3. Run the integration tests
+databricks bundle run integration_tests_dev --target dev
+```
+
+#### Option 3: CI/CD Pipeline Integration
+
+For automated testing in CI/CD, see `.github-workflows-example.yml` for a GitHub Actions example that automatically runs tests on every deployment.
+
+### Test Results
+
+Tests will produce detailed output including:
+- ✅ Pass/Fail status for each test
+- Detailed validation messages
+- Summary statistics
+- Overall success rate
+
+Example output:
+```
+==========================================================
+TEST EXECUTION SUMMARY
+==========================================================
+✅ Test 1: Data Preparation Output Validation: PASSED
+✅ Test 2: Data Quality Validation: PASSED
+✅ Test 3: Analysis Results Validation: PASSED
+✅ Test 4: Data Consistency Validation: PASSED
+
+----------------------------------------------------------
+Total Tests: 4
+Passed: 4 ✅
+Failed: 0 ❌
+Success Rate: 100.0%
+==========================================================
+```
+
+For detailed testing documentation, see `TESTING.md`.
+
 ## Deployment
 
 ### 1. Authenticate with Databricks
@@ -105,29 +189,35 @@ databricks bundle deploy --target dev
 
 This will:
 - Upload notebooks to your workspace
-- Create the workflow job
+- Create the workflow jobs (main + test)
 - Configure all resources as defined
 
-### 4. Run the Workflow
+### 4. Run and Test the Workflow
 
-You can trigger the workflow manually:
+Use the test script for automated deployment and testing:
 
 ```bash
-databricks bundle run demo_workflow --target dev
+./run_tests.sh dev
 ```
 
-Or use the Databricks CLI directly:
+Or run workflows manually:
 
 ```bash
-databricks jobs run-now --job-id <job-id>
+# Run main workflow
+databricks bundle run demo_workflow --target dev
+
+# Run integration tests
+databricks bundle run integration_tests --target dev
 ```
 
 ### 5. Monitor the Run
 
 Check the status in the Databricks workspace UI:
 - Navigate to **Workflows** in the sidebar
-- Find your workflow: `demo_workflow_dev`
-- Click on it to view run history and details
+- Find your workflows:
+  - `demo_workflow_dev` - Main data pipeline (this is the deployed name)
+  - `integration_tests_dev` - Integration tests (this is the deployed name)
+- Click on them to view run history and details
 
 ## Deployment Targets
 
@@ -198,6 +288,12 @@ databricks bundle deploy --target dev
 # Run a specific workflow
 databricks bundle run demo_workflow --target dev
 
+# Run integration tests
+databricks bundle run integration_tests --target dev
+
+# Run full test suite (deploy + workflow + tests)
+./run_tests.sh dev
+
 # View deployment summary
 databricks bundle summary --target dev
 
@@ -241,11 +337,14 @@ export DATABRICKS_TOKEN="your-token"
 
 1. **Use separate targets** for development and production
 2. **Test in dev** before deploying to production
-3. **Use version control** (Git) for your bundle configurations
-4. **Set up CI/CD** pipelines for automated deployments
-5. **Use service principals** for production deployments
-6. **Monitor job runs** and set up appropriate alerts
-7. **Document changes** in your notebooks and configurations
+3. **Run integration tests** after every deployment to catch issues early
+4. **Use version control** (Git) for your bundle configurations
+5. **Set up CI/CD** pipelines for automated deployments with testing
+6. **Use service principals** for production deployments
+7. **Monitor job runs** and set up appropriate alerts
+8. **Document changes** in your notebooks and configurations
+9. **Review test results** before promoting to production
+10. **Add new tests** when adding new features or tasks
 
 ## Additional Resources
 

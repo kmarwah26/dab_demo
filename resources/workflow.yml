@@ -8,15 +8,7 @@ resources:
           notebook_task:
             notebook_path: ../src/task_1_data_preparation.py
             source: WORKSPACE
-          new_cluster:
-            spark_version: "13.3.x-scala2.12"
-            node_type_id: "Standard_DS3_v2"
-            num_workers: 2
-            spark_conf:
-              "spark.databricks.cluster.profile": "singleNode"
-              "spark.master": "local[*]"
-            custom_tags:
-              ResourceClass: "SingleNode"
+          job_cluster_key: shared_cluster
         
         - task_key: task_2_data_analysis
           depends_on:
@@ -24,15 +16,19 @@ resources:
           notebook_task:
             notebook_path: ../src/task_2_data_analysis.py
             source: WORKSPACE
+          job_cluster_key: shared_cluster
+      
+      # Define shared classic compute cluster for all tasks
+      job_clusters:
+        - job_cluster_key: shared_cluster
           new_cluster:
             spark_version: "13.3.x-scala2.12"
             node_type_id: "Standard_DS3_v2"
-            num_workers: 2
+            num_workers: 1
             spark_conf:
-              "spark.databricks.cluster.profile": "singleNode"
-              "spark.master": "local[*]"
+              "spark.databricks.delta.preview.enabled": "true"
             custom_tags:
-              ResourceClass: "SingleNode"
+              ResourceClass: "Classic"
       
       # Schedule to run daily at 9 AM UTC
       schedule:
@@ -48,8 +44,8 @@ resources:
       # Maximum concurrent runs
       max_concurrent_runs: 1
       
-      # Timeout in seconds (4mins)
-      timeout_seconds: 240
+      # Timeout in seconds (15 minutes for cluster startup + execution)
+      timeout_seconds: 900
       
       tags:
         environment: "${bundle.target}"
